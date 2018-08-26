@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="GBK"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	http://www.springframework.org/schema/tx 
+	http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+	http://www.springframework.org/schema/aop 
+	http://www.springframework.org/schema/aop/spring-aop-4.0.xsd">
+
+	<!-- 定义业务逻辑组件模板,为之注入DAO组件 -->
+	<bean id="audTemplate" abstract="true" lazy-init="true"
+		p:audDao-ref="auditorDao"
+		p:paDao-ref="paperDao"
+		p:prDao-ref="projectDao"
+		p:rsDao-ref="roleScoreDao"
+		p:teaDao-ref="teacherDao"
+		p:userDao-ref="userDao"/>
+
+	<!-- 定义两个业务逻辑组件，继承业务逻辑组件的模板 -->
+	<bean id="audManager"
+		class="srmsystem.service.impl.AudManagerImpl"
+		parent="audTemplate"/>
+		
+	<bean id="teaManager"
+		class="srmsystem.service.impl.TeaManagerImpl"
+		parent="audTemplate"/>
+
+	
+
+	
+	<!-- 配置Hibernate的局部事务管理器，使用HibernateTransactionManager类 
+		并注入SessionFactory的引用 -->
+	<bean id="transactionManager" class=
+		"org.springframework.orm.hibernate4.HibernateTransactionManager"
+		p:sessionFactory-ref="sessionFactory"/>	
+	<!-- 配置事务增强处理Bean,指定事务管理器 -->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<!-- 用于配置详细的事务语义 -->
+		<tx:attributes>
+			<!-- 所有以'get'开头的方法是read-only的 -->
+			<tx:method name="get*" read-only="true"/>
+			<!-- 其他方法使用默认的事务设置 -->
+			<tx:method name="*"/>
+		</tx:attributes>
+	</tx:advice>
+	<aop:config>
+		<!-- 配置一个切入点，匹配audManager和teaManager
+			两个Bean的所有方法的执行 -->
+		<aop:pointcut id="leePointcut"
+			expression="bean(audManager) or bean(teaManager)"/>
+		<!-- 指定在leePointcut切入点应用txAdvice事务增强处理 -->
+		<aop:advisor advice-ref="txAdvice" 
+			pointcut-ref="leePointcut"/>
+	</aop:config>	
+</beans>

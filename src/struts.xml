@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="GBK"?>
+<!-- 指定Struts2配置文件的DTD信息 -->
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+<!-- Struts2配置文件的根元素 -->
+<struts>
+	<!-- 配置了系列常量 -->
+	<constant name="struts.custom.i18n.resources" value="resource"/>
+	<constant name="struts.i18n.encoding" value="GBK"/>
+	<constant name="struts.devMode" value="true"/>
+	<package name="default" extends="struts-default">
+		<interceptors>
+			<!-- 配置审核员角色的权限检查拦截器 -->
+			<interceptor name="audAuth"	class=
+			"srmsystem.action.authority.AudAuthorityInterceptor"/>
+			<!-- 配置教师角色的权限检查拦截器 -->
+			<interceptor name="teaAuth"	class=
+			"srmsystem.action.authority.TeaAuthorityInterceptor"/>
+			<!-- 配置审核员的默认的拦截器栈 -->
+			<interceptor-stack name="audStack">
+				<interceptor-ref name="defaultStack"/>
+				<interceptor-ref name="audAuth"/>
+			</interceptor-stack>
+			<!-- 配置教师的默认的拦截器栈 -->
+			<interceptor-stack name="teaStack">
+				<interceptor-ref name="defaultStack"/>
+				<interceptor-ref name="teaAuth"/>
+			</interceptor-stack>
+		</interceptors>
+
+		<!-- 定义全局Result映射 -->
+		<global-results>
+			<!-- 定义sql、root两个异常对应的视图页 -->
+			<result name="business">/WEB-INF/content/error.jsp</result>
+			<result name="root">/WEB-INF/content/error.jsp</result>
+			<!-- 定义login逻辑视图对应的视图资源 -->
+			<result name="login">/WEB-INF/content/login.jsp</result>
+		</global-results>
+
+		<!-- 定义全局异常映射 -->
+		<global-exception-mappings>
+			<!-- 当Action中遇到HrException异常时，
+				系统将转入name为business的结果中 -->
+			<exception-mapping 
+				exception="srmsystem.exception.HrException"
+				result="business"/>
+			<!-- 当Action中遇到Exception异常时，
+				系统将转入name为root的结果中 
+			<exception-mapping exception="java.lang.Exception" 
+				result="root"/>-->
+		</global-exception-mappings>
+
+
+		<!-- 定义处理登出请求的Action -->
+		<action name="logout" 
+			class="srmsystem.action.LogoutAction">
+			<result>/WEB-INF/content/main.jsp</result>
+		</action>
+		<!-- 定义处理登录系统的的Action -->
+		<action name="login"
+			class="srmsystem.action.LoginAction">
+			<result name="input">/WEB-INF/content/login.jsp</result>
+			<result name="aud">/WEB-INF/content/auditor/index.jsp</result>
+			<result name="tea">/WEB-INF/content/teacher/index.jsp</result>
+			<result name="error">/WEB-INF/content/login.jsp</result>
+		</action>
+		
+<!--============================下面是教师角色的Action========================-->
+		<!-- 定义计算论文分数的Action -->
+		<action name="markPap"
+			class="srmsystem.action.MarkPapAction">
+			<interceptor-ref name="teaStack"/>
+			<result name="input">/WEB-INF/content/teacher/markPaper.jsp</result>
+			<result name="success">/WEB-INF/content/teacher/applyPaper.jsp</result>
+			<result name="error">/WEB-INF/content/teacher/markPaper.jsp</result>
+		</action>
+		<!-- 定义保存论文的Action -->
+		<action name="savePap"
+			class="srmsystem.action.ApplyPapAction" method="save">
+			<interceptor-ref name="teaStack"/>
+			<result name="input">/WEB-INF/content/teacher/applyPaper.jsp</result>
+			<result name="success">/WEB-INF/content/teacher/applyPaper.jsp</result>
+			<result name="error">/WEB-INF/content/teacher/applyPaper.jsp</result>
+		</action>
+		<!-- 定义提交论文的Action -->
+		<action name="applyPap"
+			class="srmsystem.action.ApplyPapAction" method="apply">
+			<interceptor-ref name="teaStack"/>
+			<result name="input">/WEB-INF/content/teacher/applyPaper.jsp</result>
+			<result name="success">/WEB-INF/content/teacher/index.jsp</result>
+			<result name="error">/WEB-INF/content/teacher/applyPaper.jsp</result>
+		</action>
+		<!-- 定义取消论文申请的Action -->
+		<action name="cancelPap"
+			class="srmsystem.action.ApplyPapAction" method="cancel">
+			<interceptor-ref name="teaStack"/>
+			<result>/WEB-INF/content/teacher/index.jsp</result>
+		</action>
+		<!-- 定义计算项目分数的Action -->
+		<action name="markPro"
+			class="srmsystem.action.MarkProAction">
+			<interceptor-ref name="teaStack"/>
+			<result name="input">/WEB-INF/content/teacher/markProject.jsp</result>
+			<result name="success">/WEB-INF/content/teacher/applyProject.jsp</result>
+			<result name="error">/WEB-INF/content/teacher/markProject.jsp</result>
+		</action>
+		<!-- 定义保存项目的Action -->
+		<action name="savePro"
+			class="srmsystem.action.ApplyProAction" method="save">
+			<interceptor-ref name="teaStack"/>
+			<result name="input">/WEB-INF/content/teacher/applyProject.jsp</result>
+			<result name="success">/WEB-INF/content/teacher/applyProject.jsp</result>
+			<result name="error">/WEB-INF/content/teacher/applyProject.jsp</result>
+		</action>
+		<!-- 定义提交项目的Action -->
+		<action name="applyPro"
+			class="srmsystem.action.ApplyProAction" method="apply">
+			<interceptor-ref name="teaStack"/>
+			<result name="input">/WEB-INF/content/teacher/applyProject.jsp</result>
+			<result name="success">/WEB-INF/content/teacher/index.jsp</result>
+			<result name="error">/WEB-INF/content/teacher/applyProject.jsp</result>
+		</action>
+		<!-- 定义取消项目申请的Action -->
+		<action name="cancelPro"
+			class="srmsystem.action.ApplyProAction" method="cancel">
+			<interceptor-ref name="teaStack"/>
+			<result>/WEB-INF/content/teacher/index.jsp</result>
+		</action>
+		<!-- 定义查看审核状态的Action -->
+		<action name="viewStatus"
+			class="srmsystem.action.ViewTeaAction" method="viewStatus">
+			<interceptor-ref name="basicStack"/>
+			<interceptor-ref name="teaStack"/>
+			<result>/WEB-INF/content/teacher/viewStatus.jsp</result>
+		</action>
+		<!-- 定义查看个人科研信息的Action -->
+		<action name="viewTeacher"
+			class="srmsystem.action.ViewTeaAction" method="view">
+			<interceptor-ref name="basicStack"/>
+			<interceptor-ref name="teaStack"/>
+			<result>/WEB-INF/content/teacher/viewTeacher.jsp</result>
+		</action>
+		<!-- 定义查看教师总分的Action -->
+		<action name="viewTeaScore"
+			class="srmsystem.action.ViewTeaAction" method="viewScore">
+			<interceptor-ref name="basicStack"/>
+			<interceptor-ref name="teaStack"/>
+			<result>/WEB-INF/content/teacher/viewScore.jsp</result>
+		</action>
+		
+
+<!--============================下面是审核员角色的Action========================-->
+		<!-- 审核论文的Action -->
+		<action name="checkPaper"
+			class="srmsystem.action.CheckPapAction" method="check">
+			<interceptor-ref name="basicStack"/>
+			<interceptor-ref name="audStack"/>
+			<result >/WEB-INF/content/auditor/checkPaper.jsp</result>
+		</action>
+		
+		<!-- 审核项目的Action -->
+		<action name="checkProject"
+			class="srmsystem.action.CheckProAction" method="check">
+			<interceptor-ref name="basicStack"/>
+			<interceptor-ref name="audStack"/>
+			<result >/WEB-INF/content/auditor/checkProject.jsp</result>
+		</action>
+		
+		<!--通过论文状态查看论文信息的Action -->
+		<action name="viewbypaStatus"
+			class="srmsystem.action.ViewAudAction" method="viewbypaStatus">
+			<interceptor-ref name="basicStack"/>
+			<interceptor-ref name="audStack"/>
+			<result>/WEB-INF/content/auditor/checkPaper.jsp</result>
+		</action>
+		
+		<!--通过论文状态查看论文信息的Action -->
+		<action name="viewbyprStatus"
+			class="srmsystem.action.ViewAudAction" method="viewbyprStatus">
+			<interceptor-ref name="basicStack"/>
+			<interceptor-ref name="audStack"/>
+			<result>/WEB-INF/content/auditor/checkProject.jsp</result>
+		</action>
+		
+		<!--通过教师编号查看科研信息的Action -->
+		<action name="view"
+			class="srmsystem.action.ViewAudAction">
+			<interceptor-ref name="basicStack"/>
+			<interceptor-ref name="audStack"/>
+			<result>/WEB-INF/content/auditor/view.jsp</result>
+		</action>
+		
+		
+		
+		<action name="viewbytea"
+			class="srmsystem.action.ViewAudAction" method="viewbytea">
+			<interceptor-ref name="basicStack"/>
+			<interceptor-ref name="audStack"/>
+			<result>/WEB-INF/content/auditor/viewbytea.jsp</result>
+		</action>
+		
+		<!--通过论文题目查看科研信息的Action -->
+		<action name="viewbypaname"
+			class="srmsystem.action.ViewAudAction" method="viewbypaname">
+			<interceptor-ref name="basicStack"/>
+			<interceptor-ref name="audStack"/>
+			<result>/WEB-INF/content/auditor/viewbypaname.jsp</result>
+		</action>	
+		
+		<!--通过项目题目查看科研信息的Action -->
+		<action name="viewbyprname"
+			class="srmsystem.action.ViewAudAction" method="viewbyprname">
+			<interceptor-ref name="basicStack"/>
+			<interceptor-ref name="audStack"/>
+			<result>/WEB-INF/content/auditor/viewbyprname.jsp</result>
+		</action>
+		<!--汇总教师分数的Action -->
+		<action name="viewScore"
+			class="srmsystem.action.ViewAudAction" method="viewScore">
+			<interceptor-ref name="basicStack"/>
+			<interceptor-ref name="audStack"/>
+			<result>/WEB-INF/content/auditor/viewScore.jsp</result>
+		</action>
+	</package>
+</struts>
